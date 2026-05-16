@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>6-Lane Swim Judge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { 
+            user-select: none; 
+            -webkit-user-select: none; 
+            touch-action: manipulation; 
+            overscroll-behavior: none;
+        }
+        .lane-btn:active { transform: scale(0.95); }
+    </style>
+</head>
+<body class="bg-yellow-400 font-bold text-black min-h-screen flex flex-col p-4">
+
+    <header class="bg-black text-yellow-400 p-4 rounded-xl shadow-lg mb-4 text-center">
+        <div class="flex justify-around text-3xl uppercase tracking-tighter">
+            <div>Ev: <span id="event-display">1</span></div>
+            <div>Ht: <span id="heat-display">1</span></div>
+        </div>
+    </header>
+
+    <div class="bg-white border-4 border-black rounded-xl p-4 mb-4 flex-grow shadow-inner">
+        <h2 class="text-center text-xl mb-2 underline">Finish Order</h2>
+        <div id="finish-list" class="flex flex-wrap gap-3 justify-center">
+            <p id="placeholder-text" class="text-gray-400 italic">Tap lanes in order...</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-6 mb-6">
+        <script>
+            for (let i = 1; i <= 6; i++) {
+                document.write(`
+                    <button onclick="recordFinish(${i})" id="lane-${i}" 
+                        class="lane-btn bg-black text-yellow-400 text-6xl h-32 rounded-2xl border-4 border-yellow-600 shadow-[0_8px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-1">
+                        ${i}
+                    </button>
+                `);
+            }
+        </script>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 mt-auto">
+        <button onclick="resetDraft()" class="bg-red-600 text-white text-2xl py-6 rounded-xl border-4 border-black active:bg-red-700">
+            CLEAR
+        </button>
+        <button onclick="submitResults()" class="bg-green-600 text-white text-2xl py-6 rounded-xl border-4 border-black active:bg-green-700">
+            SUBMIT
+        </button>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        // Replace these with your actual Supabase credentials
+        const SUPABASE_URL = 'https://peoxjjxerpapvindbcdr.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_Q3AoN87tx7pfDhnMaA37nw_-WE3oQz8';
