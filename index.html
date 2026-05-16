@@ -27,25 +27,49 @@
         }
 
         function updateDisplay() {
-            const list = document.getElementById('finish-list');
-            const placeholder = document.getElementById('placeholder-text');
-            if (finishOrder.length > 0) placeholder.style.display = 'none';
-            
-            list.innerHTML = finishOrder.map((lane) => `
-                <div class="bg-black text-yellow-400 text-4xl w-16 h-16 flex items-center justify-center rounded-full border-2 border-yellow-400 shadow-md">
-                    ${lane}
-                </div>
-            `).join('');
+    const list = document.getElementById('finish-list');
+    const placeholder = document.getElementById('placeholder-text');
+    
+    // Check if placeholder exists before trying to hide it
+    if (placeholder) {
+        if (finishOrder.length > 0) {
+            placeholder.style.display = 'none';
+        } else {
+            placeholder.style.display = 'block';
         }
+    }
+    
+    // Create the circles
+    const circlesHtml = finishOrder.map((lane) => `
+        <div class="bg-black text-yellow-400 text-4xl w-16 h-16 flex items-center justify-center rounded-full border-2 border-yellow-400 shadow-md">
+            ${lane}
+        </div>
+    `).join('');
 
-        function resetDraft() {
-            finishOrder = [];
-            document.getElementById('finish-list').innerHTML = '<p id="placeholder-text" class="text-gray-400 italic">Tap lanes in order...</p>';
-            for (let i = 1; i <= 6; i++) {
-                const btn = document.getElementById(`lane-${i}`);
-                if (btn) btn.classList.remove('opacity-20', 'pointer-events-none');
-            }
+    // If you put the placeholder inside the 'list', 
+    // we need to make sure we don't delete it or that we handle its absence.
+    // The safest way is to have a separate container for the circles:
+    list.innerHTML = circlesHtml; 
+}
+
+function resetDraft() {
+    finishOrder = [];
+    
+    // Clear the circles
+    document.getElementById('finish-list').innerHTML = '';
+    
+    // Show the placeholder again
+    const placeholder = document.getElementById('placeholder-text');
+    if (placeholder) placeholder.style.display = 'block';
+    
+    // Reactivate all buttons
+    for (let i = 1; i <= 6; i++) {
+        const btn = document.getElementById(`lane-${i}`);
+        if (btn) {
+            btn.classList.remove('opacity-20', 'pointer-events-none');
         }
+    }
+}
 
         async function submitResults() {
             if (finishOrder.length === 0) return alert("Tap order first!");
