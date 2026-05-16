@@ -6,13 +6,65 @@
     <title>6-Lane Swim Judge</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { 
-            user-select: none; 
-            -webkit-user-select: none; 
-            touch-action: manipulation; 
-            overscroll-behavior: none;
+    
+    <script>
+        // --- CONFIGURATION MOVED TO TOP ---
+        const SUPABASE_URL = 'https://peoxjjxerpapvindbcdr.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_Q3AoN87tx7pfDhnMaA37nw_-WE3oQz8';
+        
+        // Initialize Supabase immediately
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let finishOrder = [];
+        let currentEvent = 1;
+        let currentHeat = 1;
+
+        function recordFinish(laneNum) {
+            if (finishOrder.includes(laneNum)) return;
+            finishOrder.push(laneNum);
+            document.getElementById(`lane-${laneNum}`).classList.add('opacity-20', 'pointer-events-none');
+            updateDisplay();
         }
+
+        function updateDisplay() {
+            const list = document.getElementById('finish-list');
+            const placeholder = document.getElementById('placeholder-text');
+            if (finishOrder.length > 0) placeholder.style.display = 'none';
+            
+            list.innerHTML = finishOrder.map((lane) => `
+                <div class="bg-black text-yellow-400 text-4xl w-16 h-16 flex items-center justify-center rounded-full border-2 border-yellow-400 shadow-md">
+                    ${lane}
+                </div>
+            `).join('');
+        }
+
+        function resetDraft() {
+            finishOrder = [];
+            document.getElementById('finish-list').innerHTML = '<p id="placeholder-text" class="text-gray-400 italic">Tap lanes in order...</p>';
+            for (let i = 1; i <= 6; i++) {
+                const btn = document.getElementById(`lane-${i}`);
+                if (btn) btn.classList.remove('opacity-20', 'pointer-events-none');
+            }
+        }
+
+        async function submitResults() {
+            if (finishOrder.length === 0) return alert("Tap order first!");
+            const payload = finishOrder.map((lane, index) => ({
+                event_num: currentEvent,
+                heat_num: currentHeat,
+                lane_num: lane,
+                assigned_place: index + 1,
+                judge_id: 'Judge_1' 
+            }));
+
+            const { error } = await supabaseClient.from('judge_places').insert(payload);
+            if (error) alert("Error: " + error.message);
+            else { alert("Success!"); resetDraft(); }
+        }
+    </script>
+
+    <style>
+        body { user-select: none; -webkit-user-select: none; touch-action: manipulation; }
         .lane-btn:active { transform: scale(0.95); }
     </style>
 </head>
@@ -20,8 +72,7 @@
 
     <header class="bg-black text-yellow-400 p-4 rounded-xl shadow-lg mb-4 text-center">
         <div class="flex justify-around text-3xl uppercase tracking-tighter">
-            <div>Ev: <span id="event-display">1</span></div>
-            <div>Ht: <span id="heat-display">1</span></div>
+            <div>Ev: 1</div><div>Ht: 1</div>
         </div>
     </header>
 
@@ -37,7 +88,7 @@
             for (let i = 1; i <= 6; i++) {
                 document.write(`
                     <button onclick="recordFinish(${i})" id="lane-${i}" 
-                        class="lane-btn bg-black text-yellow-400 text-6xl h-32 rounded-2xl border-4 border-yellow-600 shadow-[0_8px_0_0_rgba(0,0,0,1)] active:shadow-none active:translate-y-1">
+                        class="lane-btn bg-black text-yellow-400 text-6xl h-32 rounded-2xl border-4 border-yellow-600 shadow-[0_8px_0_0_rgba(0,0,0,1)]">
                         ${i}
                     </button>
                 `);
@@ -46,16 +97,9 @@
     </div>
 
     <div class="grid grid-cols-2 gap-4 mt-auto">
-        <button onclick="resetDraft()" class="bg-red-600 text-white text-2xl py-6 rounded-xl border-4 border-black active:bg-red-700">
-            CLEAR
-        </button>
-        <button onclick="submitResults()" class="bg-green-600 text-white text-2xl py-6 rounded-xl border-4 border-black active:bg-green-700">
-            SUBMIT
-        </button>
+        <button onclick="resetDraft()" class="bg-red-600 text-white text-2xl py-6 rounded-xl border-4 border-black">CLEAR</button>
+        <button onclick="submitResults()" class="bg-green-600 text-white text-2xl py-6 rounded-xl border-4 border-black">SUBMIT</button>
     </div>
 
-    <script>
-        // --- CONFIGURATION ---
-        // Replace these with your actual Supabase credentials
-        const SUPABASE_URL = 'https://peoxjjxerpapvindbcdr.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_Q3AoN87tx7pfDhnMaA37nw_-WE3oQz8';
+</body>
+</html>
